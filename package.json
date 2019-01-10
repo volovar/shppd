@@ -1,0 +1,38 @@
+{
+    "name": "shppd",
+    "version": "0.1.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dist": "webpack --env.production",
+        "build": "webpack",
+        "start": "webpack-dev-server",
+        "start-prod": ""
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@babel/core": "^7.2.2",
+        "@babel/plugin-proposal-class-properties": "^7.2.3",
+        "@babel/plugin-proposal-object-rest-spread": "^7.2.0",
+        "@babel/plugin-transform-react-jsx": "^7.2.0",
+        "@babel/preset-env": "^7.2.3",
+        "babel-loader": "^8.0.5",
+        "dotenv": "^6.2.0",
+        "emotion": "^10.0.5",
+        "html-webpack-plugin": "^3.2.0",
+        "prop-types": "^15.6.2",
+        "react": "^16.7.0",
+        "react-dom": "^16.7.0",
+        "webpack": "^4.28.3",
+        "webpack-cli": "^3.2.0",
+        "webpack-dev-server": "^3.1.14"
+    },
+    "browserslist": [
+        ">0.2%",
+        "not dead",
+        "not ie <= 11",
+        "not op_mini all"
+    ]
+}
