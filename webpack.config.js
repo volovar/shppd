@@ -4,11 +4,21 @@ const HtmlWebpackPlugin = require("html-webpack-plugin")
 const dotenv = require("dotenv")
 
 module.exports = (env = {}) => {
-    const processEnv = dotenv.config().parsed
-    const processEnvKeys = Object.keys(processEnv).reduce((prev, next) => {
-        prev[`process.env.${next}`] = JSON.stringify(processEnv[next])
-        return prev
-    }, {})
+    let plugins = [
+        new HtmlWebpackPlugin({
+            template: resolve(__dirname, "src/index.html")
+        })
+    ]
+
+    if (!env.production) {
+        const processEnv = dotenv.config().parsed
+        const processEnvKeys = Object.keys(processEnv).reduce((prev, next) => {
+            prev[`process.env.${next}`] = JSON.stringify(processEnv[next])
+            return prev
+        }, {})
+
+        plugins.push(new DefinePlugin(processEnvKeys))
+    }
 
     return {
         entry: resolve(__dirname, "src/index.js"),
@@ -22,12 +32,7 @@ module.exports = (env = {}) => {
                 { test: /\.js$/, exclude: /node_modules/, use: "babel-loader" }
             ]
         },
-        plugins: [
-            new HtmlWebpackPlugin({
-                template: resolve(__dirname, "src/index.html")
-            }),
-            new DefinePlugin(processEnvKeys)
-        ],
+        plugins,
         devServer: {
             port: 9011
         }
