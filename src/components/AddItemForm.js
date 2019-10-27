@@ -1,8 +1,8 @@
-import React, { Component } from "react"
+import React, { Component } from "react";
 
 class AddItemForm extends Component {
     constructor(props) {
-        super(props)
+        super(props);
 
         this.state = {
             name: "",
@@ -11,23 +11,22 @@ class AddItemForm extends Component {
             shipped: "no",
             arrived: "no",
             notes: "-",
-            tracking: "-",
-            date: ""
-        }
+            tracking: "-"
+        };
 
-        this.handleInputChange = this.handleInputChange.bind(this)
-        this.handleFormSubmit = this.handleFormSubmit.bind(this)
+        this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleFormSubmit = this.handleFormSubmit.bind(this);
     }
 
     handleInputChange(e) {
-        let state = {}
-        state[e.target.id] = e.target.value
-        this.setState({ ...state })
+        let state = {};
+        state[e.target.id] = e.target.value;
+        this.setState({ ...state });
     }
 
     handleFormSubmit(e) {
-        e.preventDefault()
-        this.props.addItem({ ...this.state })
+        e.preventDefault();
+        this.props.addItem({ ...this.state });
     }
 
     render() {
@@ -105,8 +104,8 @@ class AddItemForm extends Component {
 
                 <button>Click to add an item</button>
             </form>
-        )
+        );
     }
 }
 
-export default AddItemForm
+export default AddItemForm;

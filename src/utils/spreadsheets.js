@@ -1,6 +1,4 @@
-import { getBasicInfo } from "../utils/user"
-
-const SHEET_ID = 0
+const SHEET_ID = 0;
 
 /**
  * Creates a new spreadsheet.
@@ -12,28 +10,28 @@ export function createSpreadsheet() {
                 title: "Shppd"
             }
         })
-        .then(response => console.log(response))
+        .then(response => console.log(response));
 }
 
 export function getSpreadSheetId() {
     return (
         window.localStorage.getItem("spreadsheet_id") ||
         process.env.SPREADSHEET_ID
-    )
+    );
 }
 
 /**
  *  Sign in the user upon button click.
  */
 export function handleAuthClick(event) {
-    window.gapi.auth2.getAuthInstance().signIn()
+    window.gapi.auth2.getAuthInstance().signIn();
 }
 
 /**
  *  Sign out the user upon button click.
  */
 export function handleSignoutClick(event) {
-    window.gapi.auth2.getAuthInstance().signOut()
+    window.gapi.auth2.getAuthInstance().signOut();
 }
 
 /**
@@ -51,7 +49,7 @@ export function addItem({
     tracking = "-",
     date
 }) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
         window.gapi.client.sheets.spreadsheets.values
             .append({
                 spreadsheetId: SPREADSHEET_ID,
@@ -63,9 +61,9 @@ export function addItem({
                 ]
             })
             .then(response => {
-                resolve(response.result)
-            })
-    })
+                resolve(response.result);
+            });
+    });
 }
 
 /**
@@ -73,19 +71,19 @@ export function addItem({
  * @param {number} index
  */
 export function removeItem(index) {
-    const cell = index + 2
-    const range = `Sheet1!A${cell}:H${cell}`
+    const cell = index + 2;
+    const range = `Sheet1!A${cell}:H${cell}`;
 
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
         window.gapi.client.sheets.spreadsheets.values
             .clear({
                 spreadsheetId: SPREADSHEET_ID,
                 range
             })
             .then(response => {
-                resolve(response.result)
-            })
-    })
+                resolve(response.result);
+            });
+    });
 }
 
 /**
@@ -97,12 +95,12 @@ export function setupHeaders(response) {
         response.result.values ||
         (response.result.values && response.result.values[0][0] === "Name")
     ) {
-        return
+        return;
     }
-    console.log("setting up headers")
+    console.log("setting up headers");
 
-    formatHeaders()
-    fillInHeaderValues()
+    formatHeaders();
+    fillInHeaderValues();
 }
 
 /**
@@ -141,7 +139,7 @@ function formatHeaders() {
                 }
             }
         ]
-    })
+    });
     // .then(response => {
     //     console.log("formatted and froze header cells")
     //     console.log(response)
@@ -173,7 +171,7 @@ function fillInHeaderValues() {
             }
         })
         .then(response => {
-            console.log("created header cells")
-            console.log(response.result)
-        })
+            console.log("created header cells");
+            console.log(response.result);
+        });
 }
