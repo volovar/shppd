@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { formCss } from "./add-item-form.styles";
 
 class AddItemForm extends Component {
     constructor(props) {
@@ -26,12 +28,14 @@ class AddItemForm extends Component {
 
     handleFormSubmit(e) {
         e.preventDefault();
-        this.props.addItem({ ...this.state });
+        const { addItem } = this.props;
+
+        addItem({ ...this.state });
     }
 
     render() {
         return (
-            <form onSubmit={this.handleFormSubmit}>
+            <form css={formCss} onSubmit={this.handleFormSubmit}>
                 <label>
                     <span>Product Name: </span>
                     <input
@@ -107,5 +111,9 @@ class AddItemForm extends Component {
         );
     }
 }
+
+AddItemForm.propTypes = {
+    addItem: PropTypes.func
+};
 
 export default AddItemForm;
