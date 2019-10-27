@@ -1,8 +1,10 @@
-import React, { Component } from "react"
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { formCss } from "./add-item-form.styles";
 
 class AddItemForm extends Component {
     constructor(props) {
-        super(props)
+        super(props);
 
         this.state = {
             name: "",
@@ -11,28 +13,29 @@ class AddItemForm extends Component {
             shipped: "no",
             arrived: "no",
             notes: "-",
-            tracking: "-",
-            date: ""
-        }
+            tracking: "-"
+        };
 
-        this.handleInputChange = this.handleInputChange.bind(this)
-        this.handleFormSubmit = this.handleFormSubmit.bind(this)
+        this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleFormSubmit = this.handleFormSubmit.bind(this);
     }
 
     handleInputChange(e) {
-        let state = {}
-        state[e.target.id] = e.target.value
-        this.setState({ ...state })
+        let state = {};
+        state[e.target.id] = e.target.value;
+        this.setState({ ...state });
     }
 
     handleFormSubmit(e) {
-        e.preventDefault()
-        this.props.addItem({ ...this.state })
+        e.preventDefault();
+        const { addItem } = this.props;
+
+        addItem({ ...this.state });
     }
 
     render() {
         return (
-            <form onSubmit={this.handleFormSubmit}>
+            <form css={formCss} onSubmit={this.handleFormSubmit}>
                 <label>
                     <span>Product Name: </span>
                     <input
@@ -105,8 +108,12 @@ class AddItemForm extends Component {
 
                 <button>Click to add an item</button>
             </form>
-        )
+        );
     }
 }
 
-export default AddItemForm
+AddItemForm.propTypes = {
+    addItem: PropTypes.func
+};
+
+export default AddItemForm;
