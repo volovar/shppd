@@ -5,15 +5,19 @@ const useGoogleAuth = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
         isSignedIn: false
     });
 
+    useEffect(() => {
+        window.gapi.load("client:auth2", initClient);
+    }, []);
+
     /**
      * Gets the current user's profile.
      */
-    const getBasicProfile = () => {
+    function getBasicProfile() {
         return window.gapi.auth2
             .getAuthInstance()
             .currentUser.get()
             .getBasicProfile();
-    };
+    }
 
     /**
      * Returns an object with the current user's name,
@@ -21,7 +25,7 @@ const useGoogleAuth = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
      * @param {boolean} isSignedIn
      * @returns {object}
      */
-    const getUserInfo = isSignedIn => {
+    function getUserInfo(isSignedIn) {
         let user = {
             isSignedIn,
             name: "",
@@ -35,24 +39,13 @@ const useGoogleAuth = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
         }
 
         return user;
-    };
-
-    /**
-     *  Called when the signed in status changes, to update the UI
-     *  appropriately. After a sign-in, the API is called.
-     */
-    const updateSigninStatus = isSignedIn => {
-        const currentUser = getUserInfo(isSignedIn);
-
-        setCurrentUser(currentUser);
-        this.setOrderData(isSignedIn);
-    };
+    }
 
     /**
      *  Initializes the API client library and sets up sign-in state
      *  listeners.
      */
-    const initClient = () => {
+    function initClient() {
         window.gapi.client
             .init({
                 apiKey: apiKey,
@@ -74,11 +67,17 @@ const useGoogleAuth = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
                     console.log(JSON.stringify(error, null, 2));
                 }
             );
-    };
+    }
 
-    useEffect(() => {
-        window.gapi.load("client:auth2", initClient);
-    }, []);
+    /**
+     *  Called when the signed in status changes, to update the UI
+     *  appropriately. After a sign-in, the API is called.
+     */
+    function updateSigninStatus(isSignedIn) {
+        const user = getUserInfo(isSignedIn);
+
+        setCurrentUser(user);
+    }
 
     return currentUser;
 };

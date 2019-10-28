@@ -12,7 +12,8 @@ import {
     removeItem,
     setupHeaders
 } from "../utils/spreadsheets";
-import { getUserInfo } from "../utils/user";
+
+import useGoogleAuth from "../hooks/useGoogleAuth";
 
 const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 const DISCOVERY_DOCS = [
@@ -21,13 +22,18 @@ const DISCOVERY_DOCS = [
 const SPREADSHEET_ID = getSpreadSheetId();
 
 const App = () => {
-    const [currentUser, setCurrentUser] = useState({ isSignedIn: false });
+    const currentUser = useGoogleAuth({
+        apiKey: process.env.API_KEY,
+        clientId: process.env.CLIENT_ID,
+        DISCOVERY_DOCS,
+        SCOPES
+    });
     const [header, setHeader] = useState([]);
     const [data, setData] = useState([]);
 
     useEffect(() => {
-        window.gapi.load("client:auth2", initClient);
-    }, []);
+        setOrderData(currentUser.isSignedIn);
+    }, [currentUser]);
 
     function setOrderData(isSignedIn) {
         if (isSignedIn) {
@@ -52,45 +58,6 @@ const App = () => {
             setData([]);
             setHeader([]);
         }
-    }
-
-    /**
-     *  Called when the signed in status changes, to update the UI
-     *  appropriately. After a sign-in, the API is called.
-     */
-    function updateSigninStatus(isSignedIn) {
-        const currentUser = getUserInfo(isSignedIn);
-
-        setCurrentUser(currentUser);
-        setOrderData(isSignedIn);
-    }
-
-    /**
-     *  Initializes the API client library and sets up sign-in state
-     *  listeners.
-     */
-    function initClient() {
-        window.gapi.client
-            .init({
-                apiKey: process.env.API_KEY,
-                clientId: process.env.CLIENT_ID,
-                discoveryDocs: DISCOVERY_DOCS,
-                scope: SCOPES
-            })
-            .then(
-                () => {
-                    window.gapi.auth2
-                        .getAuthInstance()
-                        .isSignedIn.listen(updateSigninStatus);
-
-                    this.updateSigninStatus(
-                        window.gapi.auth2.getAuthInstance().isSignedIn.get()
-                    );
-                },
-                error => {
-                    console.log(JSON.stringify(error, null, 2));
-                }
-            );
     }
 
     const handleAddItem = newItem => {
