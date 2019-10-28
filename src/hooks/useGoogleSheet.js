@@ -1,10 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useGoogleAuth from "./useGoogleAuth";
 
-const useGoogleSheet = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
-    const user = useGoogleAuth({ apiKey, clientId, DISCOVERY_DOCS, SCOPES });
+const SPREADSHEET_ID = getSpreadSheetId();
 
-    function setOrderData(isSignedIn) {
+const useGoogleSheet = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
+    const currentUser = useGoogleAuth({
+        apiKey,
+        clientId,
+        DISCOVERY_DOCS,
+        SCOPES
+    });
+
+    const [sheetData, setSheetData] = useState([]);
+    const [header, setHeader] = useState([]);
+
+    useEffect(() => {
+        updateSheetData(currentUser.isSignedIn);
+    }, [currentUser]);
+
+    function updateSheetData(isSignedIn) {
         if (isSignedIn) {
             window.gapi.client.sheets.spreadsheets.values
                 .get({
@@ -13,8 +27,9 @@ const useGoogleSheet = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
                 })
                 .then(
                     response => {
+                        console.log(response.result.values);
                         setupHeaders(response);
-                        setData(response.result.values.slice(1));
+                        setSheetData(response.result.values.slice(1));
                         setHeader(response.result.values[0]);
                     },
                     err => {
@@ -24,7 +39,7 @@ const useGoogleSheet = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
                     }
                 );
         } else {
-            setData([]);
+            setSheetData([]);
             setHeader([]);
         }
     }
@@ -38,7 +53,7 @@ const useGoogleSheet = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
                 })
                 .then(response => {
                     console.log(response);
-                    setData([...data, ...response.result.values]);
+                    setSheetData([...sheetData, ...response.result.values]);
                 });
         });
     };
@@ -65,6 +80,171 @@ const useGoogleSheet = ({ apiKey, clientId, DISCOVERY_DOCS, SCOPES }) => {
             console.log(result);
         });
     };
+
+    return [currentUser, sheetData, header, handleAddItem, handleRemoveItem];
 };
+
+function getSpreadSheetId() {
+    return (
+        window.localStorage.getItem("spreadsheet_id") ||
+        process.env.SPREADSHEET_ID
+    );
+}
+
+/**
+ * Adds a new item to the spreadsheet.
+ * @param {object} item - an object containing the data to be saved
+ * @returns {array}
+ */
+function addItem({
+    name,
+    type,
+    store,
+    shipped,
+    arrived,
+    notes = "-",
+    tracking = "-",
+    date
+}) {
+    return new Promise(resolve => {
+        window.gapi.client.sheets.spreadsheets.values
+            .append({
+                spreadsheetId: SPREADSHEET_ID,
+                range: "Sheet1!A1:H1",
+                valueInputOption: "USER_ENTERED",
+                majorDimension: "ROWS",
+                values: [
+                    [name, type, store, shipped, arrived, notes, tracking, date]
+                ]
+            })
+            .then(response => {
+                resolve(response.result);
+            });
+    });
+}
+
+/**
+ * Creates a new spreadsheet.
+ */
+/* TODO: implement this */
+function createSpreadsheet() {
+    window.gapi.client.sheets.spreadsheets
+        .create({
+            properties: {
+                title: "Shppd"
+            }
+        })
+        .then(response => console.log(response));
+}
+
+/**
+ * Remove the cells at the given index
+ * @param {number} index
+ */
+function removeItem(index) {
+    const cell = index + 2;
+    const range = `Sheet1!A${cell}:H${cell}`;
+
+    return new Promise(resolve => {
+        window.gapi.client.sheets.spreadsheets.values
+            .clear({
+                spreadsheetId: SPREADSHEET_ID,
+                range
+            })
+            .then(response => {
+                resolve(response.result);
+            });
+    });
+}
+
+/**
+ * Formats the header row of a new sheet and fills in the
+ * values for the header cells.
+ */
+function setupHeaders(response) {
+    if (
+        response.result.values ||
+        (response.result.values && response.result.values[0][0] === "Name")
+    ) {
+        return;
+    }
+    console.log("setting up headers");
+
+    formatHeaders(0);
+    fillInHeaderValues(0);
+
+    /**
+     * Freeze header row and set formatting.
+     */
+    function formatHeaders(SHEET_ID) {
+        window.gapi.client.sheets.spreadsheets.batchUpdate({
+            spreadsheetId: SPREADSHEET_ID,
+            requests: [
+                {
+                    repeatCell: {
+                        range: {
+                            sheetId: SHEET_ID,
+                            startRowIndex: 0,
+                            endRowIndex: 1
+                        },
+                        cell: {
+                            userEnteredFormat: {
+                                textFormat: {
+                                    bold: true
+                                }
+                            }
+                        },
+                        fields: "userEnteredFormat.textFormat"
+                    }
+                },
+                {
+                    updateSheetProperties: {
+                        properties: {
+                            sheetId: SHEET_ID,
+                            gridProperties: {
+                                frozenRowCount: 1
+                            }
+                        },
+                        fields: "gridProperties.frozenRowCount"
+                    }
+                }
+            ]
+        });
+        // .then(response => {
+        //     console.log("formatted and froze header cells")
+        //     console.log(response)
+        // })
+    }
+
+    /**
+     * Update the header cell values.
+     */
+    function fillInHeaderValues() {
+        window.gapi.client.sheets.spreadsheets.values
+            .update({
+                spreadsheetId: SPREADSHEET_ID,
+                range: "Sheet1!A1:H1",
+                valueInputOption: "USER_ENTERED",
+                resource: {
+                    values: [
+                        [
+                            "Name",
+                            "Type",
+                            "Store",
+                            "Shipped",
+                            "Arrived",
+                            "Notes",
+                            "Tracking",
+                            "Delivery Date"
+                        ]
+                    ]
+                }
+            })
+            .then(response => {
+                console.log("created header cells");
+                console.log(response.result);
+            });
+    }
+}
 
 export default useGoogleSheet;
