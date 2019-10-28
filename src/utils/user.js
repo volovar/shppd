@@ -1,31 +1,13 @@
 /**
- * Returns an object with the current user's name,
- * profile image url and if they're signed in.
- * @param {boolean} isSignedIn
- * @returns {object}
+ *  Sign in the user upon button click.
  */
-export function getUserInfo(isSignedIn) {
-    let user = {
-        isSignedIn,
-        name: "",
-        imageUrl: ""
-    }
-
-    if (isSignedIn) {
-        const basicProfile = getBasicProfile()
-        user.name = basicProfile.getName()
-        user.imageUrl = basicProfile.getImageUrl()
-    }
-
-    return user
+export function handleAuthClick() {
+    window.gapi.auth2.getAuthInstance().signIn();
 }
 
 /**
- * Gets the current user's profile.
+ *  Sign out the user upon button click.
  */
-export function getBasicProfile() {
-    return window.gapi.auth2
-        .getAuthInstance()
-        .currentUser.get()
-        .getBasicProfile()
+export function handleSignoutClick() {
+    window.gapi.auth2.getAuthInstance().signOut();
 }
