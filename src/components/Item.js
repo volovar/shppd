@@ -1,26 +1,25 @@
-import React from "react"
-import { css } from "emotion"
-
-const itemStyles = css`
-    background: #e1e1e1;
-    box-sizing: border-box;
-    margin-bottom: 1em;
-    padding: 0.4em;
-    position: relative;
-`
+import React from "react";
+import PropTypes from "prop-types";
+import { itemCss } from "./item.styles";
 
 const Item = ({ item, index, removeItem }) => {
     const handleClick = () => {
-        removeItem(index)
-    }
+        removeItem(index);
+    };
 
     return (
-        <div className={itemStyles}>
+        <div css={itemCss}>
             <h3>Name: {item[0]}</h3>
             {item[1]}
             <button onClick={handleClick}>X</button>
         </div>
-    )
-}
+    );
+};
 
-export default Item
+Item.propTypes = {
+    item: PropTypes.array,
+    index: PropTypes.number,
+    removeItem: PropTypes.func
+};
+
+export default Item;
